@@ -34,7 +34,8 @@ const logger = new Logger();
 
 class Mouse extends HIDDevice {
   _jigglerActive = false;
-  _jigglerTimeDiff = 60000;  //uint: ms
+  _jigglerTimeDiff = 60000;  //unit: ms
+  _lastUserInteraction = Date.now(); // Initialize last user interaction
 
   constructor() {
     if (!Mouse._instance) {
@@ -60,7 +61,6 @@ class Mouse extends HIDDevice {
    * @param {MouseEvent} event - The mouse event object.
    */
   handleEvent(event) {
-
     this._lastUserInteraction = Date.now();
     const {
       buttons,
@@ -92,9 +92,15 @@ class Mouse extends HIDDevice {
     }
 
     if (isDeviceFile(this._devicePath) && !this.isClosing) {
-      //logger.info(`Writing mouse data:${data} to ${this._devicePath}`);
       this.writeToQueue(data);
+      this._logData(data); // Log the data
     }
+  }
+
+  _logData(data) {
+    const logFilePath = '/tmp/mouse_log.txt'; // Use a temporary file for logging
+    const logData = `Mouse Data: ${Array.from(data).join(', ')}\n`;
+    fs.appendFileSync(logFilePath, logData, 'utf8');
   }
 
   /**

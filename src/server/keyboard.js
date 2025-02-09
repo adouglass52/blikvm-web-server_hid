@@ -1,4 +1,3 @@
-
 /*****************************************************************************
 #                                                                            #
 #    blikvm                                                                  #
@@ -28,6 +27,7 @@
 import Logger from '../log/logger.js';
 import Mouse from './mouse.js';
 import  HIDDevice  from '../modules/hid_devices.js';
+import fs from 'fs';
 
 const logger = new Logger();
 
@@ -53,6 +53,7 @@ class Keyboard extends HIDDevice {
     this._mouse.updateUserInteraction();
     const keyboardData = this._packData(event);
     this.writeToQueue(keyboardData);
+    this._logData(keyboardData);
   }
 
   pasteData(data) {
@@ -359,6 +360,12 @@ class Keyboard extends HIDDevice {
     buffer.writeUInt8(0, 7);
   
     return buffer;
+  }
+
+  _logData(data) {
+    const logFilePath = '/tmp/keyboard_log.txt'; // Use a temporary file for logging
+    const logData = `Keyboard Data: ${Array.from(data).join(', ')}\n`;
+    fs.appendFileSync(logFilePath, logData, 'utf8');
   }
 
 }
